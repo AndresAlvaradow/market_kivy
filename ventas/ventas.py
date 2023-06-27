@@ -12,7 +12,7 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 Builder.load_file('ventas/ventas.kv')
 import sys
-sys.path.append(r"C:\\python\\kivy_hernan")
+sys.path.append(r"C:\\proyectosPython\\market_kivy-main")
 from model.operacionesDB import obtener_producto, actualizar_cantidad, insert_venta, obtener_id_ventas, insert_detalle_ventas
 
 
@@ -28,7 +28,7 @@ from model.operacionesDB import obtener_producto, actualizar_cantidad, insert_ve
     {'codigo': '999', 'nombre': 'refresco 600ml', 'precio': 15.0, 'cantidad': 10},
     {'codigo': '123', 'nombre': 'leche nutri', 'precio': 15.0, 'cantidad': 15}
 ]'''
-inventario= obtener_producto()
+
 
 class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior,
                                 RecycleBoxLayout):
@@ -166,6 +166,7 @@ class ProductoPorNombrePopup(Popup):
         self.agregar_producto=agregar_producto_callback
 
     def mostrar_articulos(self):
+        inventario= obtener_producto()
         self.open()
         for nombre in inventario:
             if nombre['nombre'].lower().find(self.input_nombre)>=0:
@@ -232,15 +233,17 @@ class NuevaCompraPopup(Popup):
 
 class VentasWindow(BoxLayout):
     usuario = None
-    def __init__(self, **kwargs):
+    def __init__(self,actualizar_productos_callback, **kwargs):
         super().__init__(*kwargs)
         self.total=0.0
         self.ids.rvs.modificar_producto=self.modificar_producto
+        self.actualizar_productos = actualizar_productos_callback
         self.date_now = datetime.now()
         self.ids.fecha.text=self.date_now.strftime("%d/%m/%y")
         Clock.schedule_interval(self.hora_actual, 1)
         
     def agregar_producto_codigo(self, codigo):
+        inventario= obtener_producto()
         for producto in inventario:
             if codigo==producto['codigo']:
                 articulo={}
@@ -307,14 +310,14 @@ class VentasWindow(BoxLayout):
 
             ventas_detalle_tuple = (id_venta, producto['precio'], producto['codigo'], producto['cantidad_carrito'])
             insert_detalle_ventas(ventas_detalle_tuple)
-            
+        inventario= obtener_producto()
         for cantidad in nueva_cantidad:
             res = next((producto for producto in inventario if producto['codigo']==cantidad['codigo']), None)
             res['cantidad']= cantidad['cantidad']
         #print("cantidad nueva", cantidad['codigo'], cantidad['cantidad'])
         actualizar_cantidad(cantidad['codigo'], cantidad['cantidad'])
 
-        
+        self.actualizar_productos(nueva_cantidad)
 
         
     def nueva_compra(self, desde_pop= False):

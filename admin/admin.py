@@ -13,7 +13,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.dropdown import DropDown
 from datetime import datetime, timedelta
 import sys
-sys.path.append(r"C:\\python\\kivy_hernan")
+sys.path.append(r"C:\\proyectosPython\\market_kivy-main")
 from model.operacionesDB import obtener_producto, insertar_producto, actualizar_producto, eliminar_producto
 from model.operacionesDB import obtener_usuarios, agregar_usuario, actualizar_user, eliminar_usuario
 from model.operacionesDB import cargar_ventas, cargar_detalle_venta, detalle_venta_producto
@@ -227,6 +227,7 @@ class ProductoPopup(Popup):
 class VistaProductos(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        
         Clock.schedule_once(self.cargar_prodcutos,1)
 
     def cargar_prodcutos(self, *args):
@@ -237,6 +238,7 @@ class VistaProductos(Screen):
         if agregar:
             producto_tuple = tuple(validado.values())
             insertar_producto(producto_tuple)
+            
             self.ids.rv_productos.data.append(validado)
             self.ids.rv_productos.refresh_from_data()
 
@@ -267,6 +269,15 @@ class VistaProductos(Screen):
             eliminar_producto(codigo)
             self.ids.rv_productos.data.pop(index)
             self.ids.rv_productos.refresh_from_data()
+
+    def actualizar_productos(self, productos_actualizados):
+        for producto_nuevo in productos_actualizados:
+            for producto_viejo in self.ids.rv_productos.data:
+                if producto_nuevo['codigo'] == producto_viejo['codigo']:
+                    producto_viejo['cantidad']=producto_nuevo['cantidad']
+                    break
+        self.ids.rv_productos.refresh_from_data()
+
 
 class UsuarioPopup(Popup):
     def __init__(self, _agregar_callback, **kwargs):
@@ -490,6 +501,8 @@ class AdminWindow(BoxLayout):
     def venta(self):
         self.parent.parent.current='scrn_ventas'
 
+    def actualizar_productos(self, productos):
+        self.ids.vista_productos.actualizar_productos(productos)
 
 class AdminApp(App):
     def build(self):

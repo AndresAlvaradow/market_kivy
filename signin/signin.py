@@ -1,7 +1,7 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 import sys
-sys.path.append(r"C:\\python\\kivy_hernan")
+sys.path.append(r"C:\\proyectosPython\\market_kivy-main")
 from model.operacionesDB import obtener_usuario
 from kivy.lang import Builder
 Builder.load_file('signin/signin.kv')
